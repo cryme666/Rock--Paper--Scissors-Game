@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 from game_logic import play_game
 from utils import *
+from user_managing import check_user
 
 
 load_dotenv()
@@ -14,6 +15,11 @@ bot = telebot.TeleBot(API_KEY)
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    user_id = message.from_user.id
+    user_name = message.from_user.username 
+    user_data = {"id": str(user_id), "username":user_name}
+    check_user(user_data)
+
     caption = f'<b>Привіт! Давай пограємо в гру:\n"Камінь-Ножниці-Папір"!</b>'
     bot.send_animation(message.chat.id, images['welcome'], caption=caption, parse_mode='HTML')
 
@@ -55,10 +61,13 @@ def bot_turn_off(message, chat_id = -4256691710):
         bot.stop_polling()
     else:
         bot.send_message(message.chat.id, f"Ви не обладаєте правами адміністратора.")
+    
+
 
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
+    print("hello")
     human_choice = message.text.lower()
     if human_choice in CHOICES:
         result,computer_choice  = play_game(human_choice)
