@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 from game_logic import play_game
 from utils import *
-from user_managing import check_user,get_balance,update_balance
+from user_managing import check_user,get_info,update_info
 
 
 
@@ -62,23 +62,52 @@ def bot_turn_off(message, chat_id = -4256691710):
     else:
         bot.send_message(message.chat.id, f"Ви не обладаєте правами адміністратора.")
     
+@bot.message_handler(commands=['info'])
+def info(message):
+    #todo
+    pass
+    user_info = f'''Загальна інформація:
+    Ім'я користувача: @{message.from_user.username}
+    Id користувача: {message.from_user.id}
+    \nСтатистика гравця:
+    Кількість перемог: {get_info(message.from_user.id,'wins')}
+    Кількість поразок: {get_info(message.from_user.id,'loses')}
+    \nБаланс гравця:
+    {get_info(message.from_user.id,'balance')} MeowCoins
+    '''
+    bot.send_message(message.chat.id, user_info)
 
 
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
+    user_data = {"id": str(message.from_user.id), "username":message.from_user.username}
+    check_user(user_data)
+
     human_choice = message.text.lower()
     if human_choice in CHOICES:
-        user_balance = get_balance(message.from_user.id)
+        user_balance = get_info(message.from_user.id,'balance')
         if user_balance == 0:
             bot.send_animation(message.chat.id, images['error'], caption="<b>Недостатньо коштів, щоб зіграти у гру.</b>", parse_mode='HTML') #todo change image
             return
 
         result,computer_choice  = play_game(human_choice)
         user_balance = user_balance + 50 if result == 1 else user_balance - 50 if result == -1 else user_balance #!!!!!!!!!!!!
-        update_balance(message.from_user.id,user_balance)
+        update_info(message.from_user.id,'balance',user_balance)
 
-        caption = f'''Користувач вибрав {human_choice}.\nОпонент вибрав {computer_choice}.\n<b>{'Переміг гравець!' if result == 1 else 'Переміг опонент!' if result == -1 else 'Нічия!'}Ваш баланс: {user_balance}</b>'''
+        if result == 1:
+            user_balance += 50
+            update_info(message.from_user.id, 'balance', user_balance)
+            wins = get_info(message.from_user.id, 'wins') + 1
+            update_info(message.from_user.id, 'wins', wins)
+        elif result == -1:
+            user_balance -= 50
+            update_info(message.from_user.id, 'balance', user_balance)
+            loses = get_info(message.from_user.id, 'loses') + 1
+            update_info(message.from_user.id, 'loses', loses)
+
+
+        caption = f'''Користувач вибрав {human_choice}.\nОпонент вибрав {computer_choice}.\n<b>{'Переміг гравець!' if result == 1 else 'Переміг опонент!' if result == -1 else 'Нічия!'}\nВаш баланс: {user_balance}</b>'''
         img_who_win = get_winner_animation(result)
         bot.send_animation(message.chat.id, img_who_win, caption=caption, parse_mode='HTML')
     else: 
