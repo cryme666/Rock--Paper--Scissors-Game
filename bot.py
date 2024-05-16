@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 import os
 from game_logic import play_game
 from utils import *
-from user_managing import check_user,get_info,update_info
-
+from user_managing import check_user,get_info,update_info,get_bonus
 
 
 load_dotenv()
@@ -64,8 +63,7 @@ def bot_turn_off(message, chat_id = -4256691710):
     
 @bot.message_handler(commands=['info'])
 def info(message):
-    #todo
-    pass
+
     user_info = f'''Загальна інформація:
     Ім'я користувача: @{message.from_user.username}
     Id користувача: {message.from_user.id}
@@ -76,6 +74,18 @@ def info(message):
     {get_info(message.from_user.id,'balance')} MeowCoins
     '''
     bot.send_message(message.chat.id, user_info)
+
+@bot.message_handler(commands=['bonus'])
+def bonus(message):
+    user_id = message.from_user.id
+    user_name = message.from_user.username 
+    remaining_time = get_bonus(user_id,user_name)
+    hours = int(remaining_time)  # Отримуємо цілу частину - години
+    minutes = int((remaining_time - hours) * 60)  
+    caption = 'Вам нараховано бонус у розмірі 300 Meow Coins.' if not remaining_time else f"Ви вже отримували бонус. Знову можна через {hours} годин {minutes}хв."
+    bot.send_message(message.chat.id, caption)
+
+    
 
 
 
@@ -88,11 +98,10 @@ def echo_all(message):
     if human_choice in CHOICES:
         user_balance = get_info(message.from_user.id,'balance')
         if user_balance == 0:
-            bot.send_animation(message.chat.id, images['error'], caption="<b>Недостатньо коштів, щоб зіграти у гру.</b>", parse_mode='HTML') #todo change image
+            bot.send_animation(message.chat.id, images['error'], caption="<b>Недостатньо коштів, щоб зіграти у гру.</b>", parse_mode='HTML')
             return
 
         result,computer_choice  = play_game(human_choice)
-        user_balance = user_balance + 50 if result == 1 else user_balance - 50 if result == -1 else user_balance #!!!!!!!!!!!!
         update_info(message.from_user.id,'balance',user_balance)
 
         if result == 1:
