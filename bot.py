@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import os
 from game_logic import play_game
 from utils import *
-from user_managing import check_user
+from user_managing import check_user,get_balance,update_balance
+
 
 
 load_dotenv()
@@ -44,8 +45,7 @@ def start_game(message):
 
 @bot.message_handler(commands=['admin'])
 def admin_parametres(message):
-    username = message.from_user.username   
-    user_id = message.from_user.id
+    username,user_id = message.from_user.username, message.from_user.id  
     if user_id in admins:
         bot.send_message(message.chat.id, f'''@{username} id: {user_id}
 chat id: {message.chat.id}
@@ -67,11 +67,18 @@ def bot_turn_off(message, chat_id = -4256691710):
 
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
-    print("hello")
     human_choice = message.text.lower()
     if human_choice in CHOICES:
+        user_balance = get_balance(message.from_user.id)
+        if user_balance == 0:
+            bot.send_animation(message.chat.id, images['error'], caption="<b>Недостатньо коштів, щоб зіграти у гру.</b>", parse_mode='HTML') #todo change image
+            return
+
         result,computer_choice  = play_game(human_choice)
-        caption = f'''Користувач вибрав {human_choice}.\nОпонент вибрав {computer_choice}.\n<b>{'Переміг гравець!' if result == 1 else 'Переміг опонент!' if result == -1 else 'Нічия!'}</b>'''
+        user_balance = user_balance + 50 if result == 1 else user_balance - 50 if result == -1 else user_balance #!!!!!!!!!!!!
+        update_balance(message.from_user.id,user_balance)
+
+        caption = f'''Користувач вибрав {human_choice}.\nОпонент вибрав {computer_choice}.\n<b>{'Переміг гравець!' if result == 1 else 'Переміг опонент!' if result == -1 else 'Нічия!'}Ваш баланс: {user_balance}</b>'''
         img_who_win = get_winner_animation(result)
         bot.send_animation(message.chat.id, img_who_win, caption=caption, parse_mode='HTML')
     else: 

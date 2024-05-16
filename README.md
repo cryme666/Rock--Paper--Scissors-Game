@@ -1,7 +1,6 @@
 to do:  
-- add count score
+- add count score/smth statitstic
 - try to use pillow
-- think about xp, levels and about to buy smth with game money
+- think about to buy smth with game money
 - button
-- how to store info about users?
 - try to use jupiter notebook
