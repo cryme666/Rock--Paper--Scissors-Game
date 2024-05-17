@@ -80,7 +80,7 @@ def bonus(message):
     user_id = message.from_user.id
     user_name = message.from_user.username 
     remaining_time = get_bonus(user_id,user_name)
-    hours = int(remaining_time)  # Отримуємо цілу частину - години
+    hours = int(remaining_time) 
     minutes = int((remaining_time - hours) * 60)  
     caption = 'Вам нараховано бонус у розмірі 300 Meow Coins.' if not remaining_time else f"Ви вже отримували бонус. Знову можна через {hours} годин {minutes}хв."
     bot.send_message(message.chat.id, caption)
