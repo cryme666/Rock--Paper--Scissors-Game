@@ -20,7 +20,7 @@ def start(message):
     user_data = {"id": str(user_id), "username":user_name}
     check_user(user_data)
 
-    caption = f'<b>Привіт! Давай пограємо в гру:\n"Камінь-Ножниці-Папір"!</b>'
+    caption = f'<b>Привіт! Давай пограємо в гру:\n"Камінь-Ножниці-Папір"!</b>\nЩоб почати гру введи команду /start_game'
     bot.send_animation(message.chat.id, images['welcome'], caption=caption, parse_mode='HTML')
 
 @bot.message_handler(commands=['help'])
