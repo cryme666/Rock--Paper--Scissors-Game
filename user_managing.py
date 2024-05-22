@@ -29,6 +29,7 @@ def add_new_user(user_data):
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writerow(user_data)
 
+
 def update_info(user_id, update_info, info):
     rows = []
     updated = False

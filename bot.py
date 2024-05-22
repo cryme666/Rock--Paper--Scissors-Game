@@ -87,8 +87,6 @@ def bonus(message):
 
     
 
-
-
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
     user_data = {"id": str(message.from_user.id), "username":message.from_user.username}
